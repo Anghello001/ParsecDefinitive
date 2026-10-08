@@ -100,208 +100,269 @@ export const AndroidCodeExportModal: React.FC<AndroidCodeExportModalProps> = ({
 </html>`,
     },
     main: {
-      title: 'MainActivity.kt',
-      filename: 'com/parsec/gamepadoverlay/MainActivity.kt',
-      language: 'kotlin',
-      code: `package com.parsec.gamepadoverlay
+      title: 'MainActivity.java (AIDE Native)',
+      filename: 'com/parsec/gamepadoverlay/MainActivity.java',
+      language: 'java',
+      code: `package com.parsec.gamepadoverlay;
 
-import android.app.Activity
-import android.content.Intent
-import android.net.Uri
-import android.os.Build
-import android.os.Bundle
-import android.provider.Settings
-import android.widget.Button
-import android.widget.Toast
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.provider.Settings;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
-class MainActivity : Activity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+public class MainActivity extends Activity {
+    private static final int REQ_CODE = 1234;
 
-        findViewById<Button>(R.id.btnToggleOverlay).setOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
-                val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
-                startActivity(intent)
-            } else {
-                val intent = Intent(this, FloatingGamepadService::class.java)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    startForegroundService(intent)
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        Button btnToggle = findViewById(R.id.btnToggleOverlay);
+        btnToggle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(MainActivity.this)) {
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
+                    startActivityForResult(intent, REQ_CODE);
                 } else {
-                    startService(intent)
+                    Intent intent = new Intent(MainActivity.this, FloatingGamepadService.class);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        startForegroundService(intent);
+                    } else {
+                        startService(intent);
+                    }
+                    Toast.makeText(MainActivity.this, "Mando Flotante Iniciado", Toast.LENGTH_SHORT).show();
                 }
-                Toast.makeText(this, "Mando Flotante Iniciado", Toast.LENGTH_SHORT).show()
             }
-        }
+        });
     }
 }`,
     },
     service: {
-      title: 'FloatingGamepadService.kt',
-      filename: 'com/parsec/gamepadoverlay/FloatingGamepadService.kt',
-      language: 'kotlin',
-      code: `package com.parsec.gamepadoverlay
+      title: 'FloatingGamepadService.java (AIDE Native)',
+      filename: 'com/parsec/gamepadoverlay/FloatingGamepadService.java',
+      language: 'java',
+      code: `package com.parsec.gamepadoverlay;
 
-import android.annotation.SuppressLint
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.Service
-import android.content.Context
-import android.content.Intent
-import android.graphics.Color
-import android.graphics.PixelFormat
-import android.os.Build
-import android.os.IBinder
-import android.view.Gravity
-import android.view.View
-import android.view.WindowManager
-import android.webkit.WebChromeClient
-import android.webkit.WebSettings
-import android.webkit.WebView
+import android.annotation.SuppressLint;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.Service;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PixelFormat;
+import android.os.Build;
+import android.os.IBinder;
+import android.view.Gravity;
+import android.view.View;
+import android.view.WindowManager;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 
-class FloatingGamepadService : Service() {
-    private var windowManager: WindowManager? = null
-    private var webView: WebView? = null
+public class FloatingGamepadService extends Service {
+    public static boolean isRunning = false;
+    private WindowManager windowManager;
+    private WebView webView;
 
-    override fun onBind(intent: Intent?): IBinder? = null
+    @Override
+    public IBinder onBind(Intent intent) { return null; }
 
     @SuppressLint("SetJavaScriptEnabled")
-    override fun onCreate() {
-        super.onCreate()
-        windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        isRunning = true;
+        windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
 
-        val windowType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-        } else {
-            WindowManager.LayoutParams.TYPE_PHONE
-        }
+        int type = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) 
+            ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY 
+            : WindowManager.LayoutParams.TYPE_PHONE;
 
-        val params = WindowManager.LayoutParams(
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.MATCH_PARENT,
-            windowType,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
-            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+            type,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
+            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             PixelFormat.TRANSLUCENT
-        ).apply {
-            gravity = Gravity.TOP or Gravity.START
-        }
+        );
+        params.gravity = Gravity.TOP | Gravity.START;
 
-        webView = WebView(this).apply {
-            setBackgroundColor(Color.TRANSPARENT)
-            setLayerType(View.LAYER_TYPE_HARDWARE, null)
-            settings.apply {
-                javaScriptEnabled = true
-                domStorageEnabled = true
-                cacheMode = WebSettings.LOAD_NO_CACHE
-            }
-            addJavascriptInterface(AndroidBridge(this@FloatingGamepadService, this), "Android")
-            webChromeClient = WebChromeClient()
-            loadUrl("file:///android_asset/index.html")
-        }
+        webView = new WebView(this);
+        webView.setBackgroundColor(Color.TRANSPARENT);
+        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        WebSettings ws = webView.getSettings();
+        ws.setJavaScriptEnabled(true);
+        ws.setDomStorageEnabled(true);
+        ws.setCacheMode(WebSettings.LOAD_NO_CACHE);
 
-        windowManager?.addView(webView, params)
+        webView.addJavascriptInterface(new AndroidBridge(this, webView), "Android");
+        webView.setWebChromeClient(new WebChromeClient());
+        webView.loadUrl("file:///android_asset/index.html");
+
+        windowManager.addView(webView, params);
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        webView?.let { windowManager?.removeView(it) }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        isRunning = false;
+        if (webView != null && windowManager != null) {
+            windowManager.removeView(webView);
+            webView.destroy();
+        }
     }
 }`,
     },
     bridge: {
-      title: 'AndroidBridge.kt',
-      filename: 'com/parsec/gamepadoverlay/AndroidBridge.kt',
-      language: 'kotlin',
-      code: `package com.parsec.gamepadoverlay
+      title: 'AndroidBridge.java (AIDE Native)',
+      filename: 'com/parsec/gamepadoverlay/AndroidBridge.java',
+      language: 'java',
+      code: `package com.parsec.gamepadoverlay;
 
-import android.content.Context
-import android.content.Intent
-import android.webkit.JavascriptInterface
-import android.webkit.WebView
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebView;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import java.util.List;
 
-class AndroidBridge(private val context: Context, private val webView: WebView) {
+public class AndroidBridge {
+    private final Context context;
+    private final WebView webView;
+
+    public AndroidBridge(Context context, WebView webView) {
+        this.context = context;
+        this.webView = webView;
+    }
 
     @JavascriptInterface
-    fun sendKeyEvent(keyCode: Int, action: Int) {
-        Thread {
-            try {
-                // Inyección por Accesibilidad o shell local
-                GamepadAccessibilityService.instance?.handleKeyEvent(keyCode, action)
-                    ?: Runtime.getRuntime().exec(arrayOf("sh", "-c", "input keyevent $keyCode"))
-            } catch (e: Exception) {
-                e.printStackTrace()
+    public void sendKeyEvent(final int keyCode, final int action) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (GamepadAccessibilityService.instance != null) {
+                        GamepadAccessibilityService.instance.handleKeyEvent(keyCode, action);
+                        return;
+                    }
+                    Runtime.getRuntime().exec(new String[]{"sh", "-c", "input keyevent " + keyCode});
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
-        }.start()
+        }).start();
     }
 
     @JavascriptInterface
-    fun sendMotionEvent(axisX: Float, axisY: Float, stickId: Int) {
-        GamepadAccessibilityService.instance?.handleMotionEvent(axisX, axisY, stickId)
-    }
-
-    @JavascriptInterface
-    fun launchApp(packageName: String): Boolean {
-        return try {
-            val intent = context.packageManager.getLaunchIntentForPackage(packageName)
-            intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(intent)
-            true
-        } catch (e: Exception) {
-            false
+    public void sendMotionEvent(float x, float y, int stickId) {
+        if (GamepadAccessibilityService.instance != null) {
+            GamepadAccessibilityService.instance.handleMotionEvent(x, y, stickId);
         }
     }
 
     @JavascriptInterface
-    fun pairAdb(ip: String, port: String, code: String): String {
-        return try {
-            val proc = Runtime.getRuntime().exec("adb pair $ip:$port $code")
-            proc.waitFor()
-            "OK"
-        } catch (e: Exception) {
-            e.message ?: "Error"
+    public boolean launchApp(String packageName) {
+        try {
+            Intent intent = context.getPackageManager().getLaunchIntentForPackage(packageName);
+            if (intent != null) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @JavascriptInterface
+    public String getInstalledApps() {
+        try {
+            PackageManager pm = context.getPackageManager();
+            Intent intent = new Intent(Intent.ACTION_MAIN, null);
+            intent.addCategory(Intent.CATEGORY_LAUNCHER);
+            List<ResolveInfo> list = pm.queryIntentActivities(intent, 0);
+            JSONArray array = new JSONArray();
+            for (ResolveInfo info : list) {
+                String pkg = info.activityInfo.packageName;
+                if (!pkg.equals(context.getPackageName())) {
+                    JSONObject obj = new JSONObject();
+                    obj.put("name", info.loadLabel(pm).toString());
+                    obj.put("packageName", pkg);
+                    array.put(obj);
+                }
+            }
+            return array.toString();
+        } catch (Exception e) {
+            return "[]";
+        }
+    }
+
+    @JavascriptInterface
+    public String pairAdb(String ip, String port, String code) {
+        try {
+            Process p = Runtime.getRuntime().exec(new String[]{"sh", "-c", "adb pair " + ip + ":" + port + " " + code});
+            p.waitFor();
+            return "OK";
+        } catch (Exception e) {
+            return "Error: " + e.getMessage();
         }
     }
 }`,
     },
     access: {
-      title: 'GamepadAccessibilityService.kt',
-      filename: 'com/parsec/gamepadoverlay/GamepadAccessibilityService.kt',
-      language: 'kotlin',
-      code: `package com.parsec.gamepadoverlay
+      title: 'GamepadAccessibilityService.java (AIDE Native)',
+      filename: 'com/parsec/gamepadoverlay/GamepadAccessibilityService.java',
+      language: 'java',
+      code: `package com.parsec.gamepadoverlay;
 
-import android.accessibilityservice.AccessibilityService
-import android.view.KeyEvent
-import android.view.accessibility.AccessibilityEvent
+import android.accessibilityservice.AccessibilityService;
+import android.os.Build;
+import android.view.KeyEvent;
+import android.view.accessibility.AccessibilityEvent;
 
-class GamepadAccessibilityService : AccessibilityService() {
-    companion object {
-        var instance: GamepadAccessibilityService? = null
+public class GamepadAccessibilityService extends AccessibilityService {
+    public static GamepadAccessibilityService instance = null;
+
+    @Override
+    protected void onServiceConnected() {
+        super.onServiceConnected();
+        instance = this;
     }
 
-    override fun onServiceConnected() {
-        super.onServiceConnected()
-        instance = this
+    @Override
+    public void onAccessibilityEvent(AccessibilityEvent event) {}
+
+    @Override
+    public void onInterrupt() {
+        instance = null;
     }
 
-    override fun onAccessibilityEvent(event: AccessibilityEvent?) {}
-
-    override fun onInterrupt() {
-        instance = null
-    }
-
-    fun handleKeyEvent(keyCode: Int, action: Int) {
+    public void handleKeyEvent(int keyCode, int action) {
         try {
-            Runtime.getRuntime().exec(arrayOf("sh", "-c", "input keyevent $keyCode"))
-        } catch (e: Exception) {
-            e.printStackTrace()
+            Runtime.getRuntime().exec(new String[]{"sh", "-c", "input keyevent " + keyCode});
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    fun handleMotionEvent(axisX: Float, axisY: Float, stickId: Int) {}
+    public void handleMotionEvent(float x, float y, int stickId) {}
+    public void handleTriggerEvent(int triggerId, float val) {}
 }`,
     },
     manifest: {
@@ -351,19 +412,56 @@ class GamepadAccessibilityService : AccessibilityService() {
 </manifest>`,
     },
     guide: {
-      title: 'Instrucciones para AIDE',
+      title: 'Solución a "./gradlew: No such file" y Guía AIDE',
       filename: 'README_AIDE.md',
       language: 'markdown',
-      code: `# Cómo compilar en AIDE (Android IDE)
+      code: `# Solución al error: "bash: ./gradlew: No such file or directory"
 
-1. En AIDE en tu teléfono o tablet Android, abre o crea una nueva aplicación.
-2. Copia 'index.html' en la carpeta: 'app/src/main/assets/index.html'.
-3. Copia las clases Kotlin en 'app/src/main/java/com/parsec/gamepadoverlay/'.
-4. Reemplaza 'AndroidManifest.xml' para incluir los permisos de superposición y accesibilidad.
-5. Toca el botón Play (Run).
-6. Al abrir la app, pulsa 'Conceder Permiso de Superposición'.
-7. Toca 'Iniciar Mando Flotante'.
-8. Abre Parsec: el mando aparecerá flotando directamente por encima del stream con baja latencia.`,
+## 1. ¿Por qué ocurrió este error?
+El error ocurrió porque intentaste ejecutar './gradlew' desde una terminal (como Termux, SSH o bash en Android) pero no existía el script Gradle Wrapper en ese directorio.
+
+## 2. Cómo compilar correctamente:
+
+### Opción A: Compilar directamente en AIDE (Recomendado sin terminal)
+En la app AIDE de tu celular Android NO necesitas usar la terminal ni ejecutar './gradlew'.
+AIDE tiene su propio compilador interno de Android:
+1. Abre AIDE en tu teléfono o tablet.
+2. Abre la carpeta del proyecto: '/android_project'.
+3. AIDE detectará automáticamente 'settings.gradle' y 'app/build.gradle'.
+4. Toca directamente el botón Play (▶ RUN) en la esquina superior derecha.
+5. Las clases Java que hemos estructurado compilan al 100% sin requerir plugins pesados de Kotlin ni descargas externas.
+
+### Opción B: Si deseas compilar por consola (Termux / Linux / Mac)
+Hemos añadido el script ejecutable 'gradlew' en la raíz de '/android_project':
+\`\`\`bash
+cd android_project
+chmod +x gradlew
+./gradlew assembleDebug
+\`\`\`
+El APK compilado se generará en:
+'android_project/app/build/outputs/apk/debug/app-debug.apk'
+
+## 3. Estructura Completa del Proyecto Generado:
+android_project/
+├── gradlew                  (Script ejecutable de Gradle Wrapper)
+├── settings.gradle          (Configuración raíz)
+├── build.gradle             (Gradle raíz)
+├── gradle/wrapper/          (gradle-wrapper.properties)
+└── app/
+    ├── build.gradle         (Configuración del módulo app con namespace)
+    └── src/main/
+        ├── AndroidManifest.xml (Permisos SYSTEM_ALERT_WINDOW y accesibilidad)
+        ├── assets/
+        │   └── index.html   (Web App optimizada con chasis unificado Xbox)
+        ├── java/com/parsec/gamepadoverlay/
+        │   ├── MainActivity.java
+        │   ├── FloatingGamepadService.java
+        │   ├── AndroidBridge.java
+        │   └── GamepadAccessibilityService.java
+        └── res/
+            ├── layout/activity_main.xml
+            ├── values/strings.xml
+            └── xml/accessibility_service_config.xml`,
     },
   };
 
@@ -413,12 +511,12 @@ class GamepadAccessibilityService : AccessibilityService() {
         <div className="flex border-b border-[#242424] bg-[#1a1a1a] overflow-x-auto text-xs font-mono">
           {[
             { id: 'index', label: 'index.html (WebView)' },
-            { id: 'main', label: 'MainActivity.kt' },
-            { id: 'service', label: 'FloatingGamepadService.kt' },
-            { id: 'bridge', label: 'AndroidBridge.kt' },
-            { id: 'access', label: 'GamepadAccessibility.kt' },
+            { id: 'main', label: 'MainActivity.java' },
+            { id: 'service', label: 'FloatingGamepadService.java' },
+            { id: 'bridge', label: 'AndroidBridge.java' },
+            { id: 'access', label: 'GamepadAccessibility.java' },
             { id: 'manifest', label: 'AndroidManifest.xml' },
-            { id: 'guide', label: 'Guía AIDE' },
+            { id: 'guide', label: 'Fix: ./gradlew y Guía AIDE' },
           ].map(tab => (
             <button
               key={tab.id}

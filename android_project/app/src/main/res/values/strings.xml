@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Parsec Gamepad Overlay</string>
+    <string name="accessibility_service_label">Parsec Gamepad Input Service</string>
+    <string name="accessibility_service_description">Permite la inyección de eventos de botones y toques táctiles para el mando flotante sobre Parsec y apps externas.</string>
+</resources>

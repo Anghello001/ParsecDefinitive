@@ -75,53 +75,53 @@ export const ActionDiamond: React.FC<{ opacity?: number; scale?: number }> = ({
         transform: `scale(${scale})`,
         transformOrigin: 'center center',
       }}
-      className="relative w-36 h-36 flex items-center justify-center bg-[#181818] border border-[#2d2d2d] rounded-sm p-1.5 shadow-[inset_0_1px_6px_rgba(0,0,0,0.6)] transition-all duration-150"
+      className="relative w-32 h-32 flex items-center justify-center transition-all duration-150"
     >
-      {/* Subtle diagonal grid accents */}
-      <div className="absolute inset-2 border border-[#262626] rounded-sm pointer-events-none opacity-40" />
+      {/* Subtle guide ring */}
+      <div className="absolute inset-1 rounded-full border border-white/5 pointer-events-none" />
 
       {/* Y Button (Top) */}
-      <div className="absolute top-1.5">
+      <div className="absolute top-0">
         <GamepadButton
           buttonKey="KEYCODE_BUTTON_Y"
           label="Y"
           badgeDotColor="#eab308" // Yellow Xbox accent
-          className="w-10 h-10 rounded-sm text-base text-yellow-400 font-sans font-black"
+          className="w-10 h-10 rounded-sm text-base text-yellow-400 font-sans font-black shadow-md border-[#383838] bg-[#222222]"
         />
       </div>
 
       {/* X Button (Left) */}
-      <div className="absolute left-1.5">
+      <div className="absolute left-0">
         <GamepadButton
           buttonKey="KEYCODE_BUTTON_X"
           label="X"
           badgeDotColor="#38bdf8" // Blue Xbox accent
-          className="w-10 h-10 rounded-sm text-base text-sky-400 font-sans font-black"
+          className="w-10 h-10 rounded-sm text-base text-sky-400 font-sans font-black shadow-md border-[#383838] bg-[#222222]"
         />
       </div>
 
       {/* B Button (Right) */}
-      <div className="absolute right-1.5">
+      <div className="absolute right-0">
         <GamepadButton
           buttonKey="KEYCODE_BUTTON_B"
           label="B"
           badgeDotColor="#ef4444" // Red Xbox accent
-          className="w-10 h-10 rounded-sm text-base text-red-400 font-sans font-black"
+          className="w-10 h-10 rounded-sm text-base text-red-400 font-sans font-black shadow-md border-[#383838] bg-[#222222]"
         />
       </div>
 
       {/* A Button (Bottom) */}
-      <div className="absolute bottom-1.5">
+      <div className="absolute bottom-0">
         <GamepadButton
           buttonKey="KEYCODE_BUTTON_A"
           label="A"
           badgeDotColor="#22c55e" // Green Xbox accent
-          className="w-10 h-10 rounded-sm text-base text-green-400 font-sans font-black"
+          className="w-10 h-10 rounded-sm text-base text-green-400 font-sans font-black shadow-md border-[#383838] bg-[#222222]"
         />
       </div>
 
       {/* Center Xbox Diamond Hub */}
-      <div className="w-5 h-5 bg-[#151515] border border-[#2a2a2a] rounded-sm flex items-center justify-center pointer-events-none">
+      <div className="w-5 h-5 bg-[#181818] border border-[#2e2e2e] rounded-sm flex items-center justify-center pointer-events-none">
         <div className="w-1.5 h-1.5 bg-[#3a3a3a] rounded-sm" />
       </div>
     </div>
@@ -140,47 +140,47 @@ export const DPadCross: React.FC<{ opacity?: number; scale?: number }> = ({
         transform: `scale(${scale})`,
         transformOrigin: 'center center',
       }}
-      className="relative w-36 h-36 flex items-center justify-center bg-[#181818] border border-[#2d2d2d] rounded-sm p-1.5 shadow-[inset_0_1px_6px_rgba(0,0,0,0.6)] transition-all duration-150"
+      className="relative w-32 h-32 flex items-center justify-center transition-all duration-150"
     >
       {/* Up */}
-      <div className="absolute top-1.5">
+      <div className="absolute top-0">
         <GamepadButton
           buttonKey="KEYCODE_DPAD_UP"
           label="▲"
-          className="w-10 h-10 rounded-sm text-sm text-gray-300"
+          className="w-10 h-10 rounded-sm text-sm text-gray-200 border-[#383838] bg-[#222222] shadow-md"
         />
       </div>
 
       {/* Down */}
-      <div className="absolute bottom-1.5">
+      <div className="absolute bottom-0">
         <GamepadButton
           buttonKey="KEYCODE_DPAD_DOWN"
           label="▼"
-          className="w-10 h-10 rounded-sm text-sm text-gray-300"
+          className="w-10 h-10 rounded-sm text-sm text-gray-200 border-[#383838] bg-[#222222] shadow-md"
         />
       </div>
 
       {/* Left */}
-      <div className="absolute left-1.5">
+      <div className="absolute left-0">
         <GamepadButton
           buttonKey="KEYCODE_DPAD_LEFT"
           label="◀"
-          className="w-10 h-10 rounded-sm text-sm text-gray-300"
+          className="w-10 h-10 rounded-sm text-sm text-gray-200 border-[#383838] bg-[#222222] shadow-md"
         />
       </div>
 
       {/* Right */}
-      <div className="absolute right-1.5">
+      <div className="absolute right-0">
         <GamepadButton
           buttonKey="KEYCODE_DPAD_RIGHT"
           label="▶"
-          className="w-10 h-10 rounded-sm text-sm text-gray-300"
+          className="w-10 h-10 rounded-sm text-sm text-gray-200 border-[#383838] bg-[#222222] shadow-md"
         />
       </div>
 
       {/* Center D-Pad pivot plate */}
-      <div className="w-8 h-8 bg-[#161616] border border-[#2e2e2e] rounded-sm flex items-center justify-center">
-        <div className="w-2.5 h-2.5 bg-[#252525] rounded-sm border border-[#333333]" />
+      <div className="w-7 h-7 bg-[#1c1c1c] border border-[#333333] rounded-sm flex items-center justify-center">
+        <div className="w-2.5 h-2.5 bg-[#252525] rounded-sm border border-[#404040]" />
       </div>
     </div>
   );

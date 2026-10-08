@@ -41,6 +41,17 @@ export default function App() {
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [backgroundScene, setBackgroundScene] = useState<'stream' | 'dark' | 'grid'>('stream');
   const [activeApp, setActiveApp] = useState<string>('Parsec Remote Client');
+  const [isPortrait, setIsPortrait] = useState<boolean>(false);
+  const [dismissPortraitTip, setDismissPortraitTip] = useState<boolean>(false);
+
+  useEffect(() => {
+    const checkOrientation = () => {
+      setIsPortrait(window.innerHeight > window.innerWidth && window.innerWidth < 768);
+    };
+    checkOrientation();
+    window.addEventListener('resize', checkOrientation);
+    return () => window.removeEventListener('resize', checkOrientation);
+  }, []);
 
   const [customSettings, setCustomSettings] = useState<GamepadCustomizationSettings>(() => {
     try {
@@ -343,11 +354,27 @@ export default function App() {
             onClick={() => setIsCustomModalOpen(true)}
             className="flex items-center gap-1 text-[10px] px-2 py-0.5 bg-[#222222] hover:bg-[#2c2c2c] border border-sky-600/70 text-sky-300 rounded-sm font-bold"
           >
-            <Sliders className="w-3 h-3" />
+            <Sliders className="w-3.5 h-3.5" />
             <span>Todos los Ajustes</span>
           </button>
         </div>
       </div>
+
+      {/* MOBILE ORIENTATION HELPER (When phone is held vertically) */}
+      {isPortrait && !dismissPortraitTip && (
+        <div className="w-full bg-[#112415] border-b border-emerald-600/70 px-3 py-1.5 flex items-center justify-between text-[11px] font-mono text-emerald-300 z-20">
+          <div className="flex items-center gap-2">
+            <Smartphone className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <span>Consejo: Gira tu teléfono a horizontal (Landscape) para posición óptima de pulgares tipo Xbox.</span>
+          </div>
+          <button
+            onClick={() => setDismissPortraitTip(true)}
+            className="text-emerald-400 hover:text-white px-1.5 font-bold"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* MAIN GAMEPAD CONTROLLER AREA */}
       <main className="relative flex-1 flex items-center justify-center overflow-y-auto overflow-x-hidden p-1 sm:p-2 z-10">

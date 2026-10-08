@@ -108,6 +108,35 @@ class AndroidBridge(
     }
 
     /**
+     * Obtiene la lista de aplicaciones instaladas en el celular en formato JSON
+     */
+    @JavascriptInterface
+    fun getInstalledApps(): String {
+        return try {
+            val pm = context.packageManager
+            val mainIntent = Intent(Intent.ACTION_MAIN, null).apply {
+                addCategory(Intent.CATEGORY_LAUNCHER)
+            }
+            val pkgAppsList = pm.queryIntentActivities(mainIntent, 0)
+            val jsonArray = org.json.JSONArray()
+            for (resolveInfo in pkgAppsList) {
+                val appName = resolveInfo.loadLabel(pm).toString()
+                val pkgName = resolveInfo.activityInfo.packageName
+                if (pkgName != context.packageName) {
+                    val jsonObj = org.json.JSONObject().apply {
+                        put("name", appName)
+                        put("packageName", pkgName)
+                    }
+                    jsonArray.put(jsonObj)
+                }
+            }
+            jsonArray.toString()
+        } catch (e: Exception) {
+            "[]"
+        }
+    }
+
+    /**
      * Ajusta la opacidad del overlay flotante (0.1 a 1.0)
      */
     @JavascriptInterface

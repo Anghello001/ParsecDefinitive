@@ -1,5 +1,5 @@
 import React from 'react';
-import { Wifi, Rocket, Code2, Sliders, Volume2, VolumeX, Eye, Terminal, Maximize2, Minimize2 } from 'lucide-react';
+import { Wifi, Rocket, Code2, Sliders, Volume2, VolumeX, Eye, Terminal, Maximize2, Minimize2, Expand } from 'lucide-react';
 import { haptics } from '../utils/audio';
 
 interface HeaderBarProps {
@@ -33,6 +33,13 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
   soundEnabled,
   onToggleSound,
 }) => {
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  };
   return (
     <header className="w-full bg-[#141414] border-b border-[#262626] px-3 sm:px-4 py-2 flex items-center justify-between gap-3 text-xs font-mono select-none z-30 shadow-md">
       {/* Left: Branding & Connection Status */}
@@ -135,6 +142,15 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
         >
           <Code2 className="w-3.5 h-3.5 text-sky-400" />
           <span className="hidden sm:inline">Código AIDE</span>
+        </button>
+
+        {/* Fullscreen Button for Mobile Gamepad */}
+        <button
+          onClick={toggleFullscreen}
+          className="p-1.5 bg-[#202020] hover:bg-[#282828] border border-[#333333] text-emerald-400 rounded-sm"
+          title="Pantalla Completa (Modo Consola / Sin barras del navegador)"
+        >
+          <Expand className="w-3.5 h-3.5" />
         </button>
 
         {/* Toggle Compact Floating Mode */}

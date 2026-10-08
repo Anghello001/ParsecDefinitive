@@ -238,6 +238,23 @@ class NativeBridgeManager {
   }
 
   /**
+   * Get installed apps list from native Android device
+   */
+  public getInstalledApps(): Array<{ name: string; packageName: string }> {
+    if (this.isNative() && window.Android?.getInstalledApps) {
+      try {
+        const jsonStr = window.Android.getInstalledApps();
+        if (jsonStr) {
+          return JSON.parse(jsonStr);
+        }
+      } catch (err) {
+        console.error('Error fetching installed apps from Android bridge', err);
+      }
+    }
+    return [];
+  }
+
+  /**
    * Control overlay opacity
    */
   public setOverlayOpacity(alpha: number): void {
