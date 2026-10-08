@@ -56,10 +56,13 @@ export interface StickVector {
 export interface InstalledApp {
   name: string;
   packageName: string;
-  category: 'streaming' | 'emulator' | 'remote' | 'game';
-  icon: string; // Lucide icon identifier or initials
+  category: 'streaming' | 'emulator' | 'remote' | 'game' | 'custom';
+  icon: string; // Emoji, initials or icon identifier
   color: string;
   description: string;
+  customUrl?: string; // Optional direct web/deep-link URL
+  isCustom?: boolean; // Flag to identify user-added apps
+  dateAdded?: number;
 }
 
 export interface AdbPairingState {
@@ -72,6 +75,9 @@ export interface AdbPairingState {
 }
 
 export interface GamepadCustomizationSettings {
+  // Layout mode
+  controllerLayoutMode: 'unified' | 'split'; // 'unified' = solid Xbox gamepad chassis; 'split' = floating side racks
+
   // Individual opacities (0.1 to 1.0)
   leftStickOpacity: number;
   rightStickOpacity: number;
@@ -85,4 +91,5 @@ export interface GamepadCustomizationSettings {
   stickSize: number;       // base stick diameter in px (e.g. 110 to 180)
   buttonScale: number;     // scale multiplier for ABXY & D-Pad (e.g. 0.8 to 1.3)
   rackSpacing: number;     // vertical gap between stick and cruceta/buttons (e.g. 12 to 36px)
+  hapticIntensity?: number;
 }

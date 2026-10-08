@@ -205,7 +205,7 @@ class NativeBridgeManager {
   }
 
   /**
-   * Launch application by package name via Android Intent
+   * Launch application by package name via Android Intent (Native or Web Intent URI)
    */
   public launchApp(packageName: string, appName: string): boolean {
     haptics.playClick('heavy');
@@ -220,7 +220,28 @@ class NativeBridgeManager {
         success = false;
       }
     } else {
-      // Browser simulation
+      // In mobile web browser, launch via standard Android Intent URI or custom scheme
+      try {
+        const isAndroidBrowser = /Android/i.test(navigator.userAgent);
+        if (isAndroidBrowser && packageName) {
+          // Specific app URI schemes
+          if (packageName === 'tv.parsec.client') {
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = `intent://#Intent;package=tv.parsec.client;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;end;`;
+            document.body.appendChild(iframe);
+            setTimeout(() => iframe.remove(), 1000);
+          } else {
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = `intent://#Intent;package=${packageName};action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;end;`;
+            document.body.appendChild(iframe);
+            setTimeout(() => iframe.remove(), 1000);
+          }
+        }
+      } catch {
+        // Ignore iframe intent errors
+      }
       success = true;
     }
 
@@ -230,7 +251,7 @@ class NativeBridgeManager {
       type: 'APP_LAUNCH',
       codeName: 'INTENT_LAUNCH_APP',
       keyCode: 0,
-      details: `Lanzando ${appName} [${packageName}] manteniendo overlay flotante activo`,
+      details: `Lanzando ${appName} [${packageName}] manteniendo mando web activo en pantalla`,
     };
     this.dispatchLog(log);
 
